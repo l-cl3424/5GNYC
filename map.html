@@ -105,13 +105,13 @@
 
 
 <div id="state-legend" class="legend">
-  <div id="title">	<h1>SIGNAL INTENSITIES NYC</h1></div>
+  <div id="title">	<h1>SIGNAL STRENGTHS NYC</h1></div>
     <h4>by Chengliang Li & Zhaoxiang Yun</h4>
-	<h4>This project is trying to visualize the mobile phone signal intensity in New York City
+	<h4>This project is trying to visualize the mobile phone signal strengths in New York City
     based on the base station data and calculation through ArcGIS. Users could hover the
-    mouse cursor on each hexagon to see the signal intensity in the area and click the legend
-     to filter areas in different siganl intensity ranges. Also, by hovering the mouse cursor on the pie-chart,
-     the chosen segment will be highlighted and a pop-up label will show the percentage of the signal intensity range. </h4>
+    mouse cursor on each hexagon to see the signal strength in the area and click the legend
+     to filter areas in different siganl strength ranges. Also, by hovering the mouse cursor on the pie-chart,
+     the chosen segment will be highlighted and a pop-up label will show the percentage of the signal strength range. </h4>
 <h4>  <div id="reset">Click the legend to filter the map.<br> Click HERE to reset the map.</div>
   <br><br>
 	<div id="group12" class="filterButton"><span style="background-color: #FF0000"></span>0.87-1.00</div>
@@ -128,7 +128,7 @@
   <div id="group1" class="filterButton"><span style="background-color: #fff2f2"></span>0.00-0.20</div></h4>
   <br><br>
   <div class='signalInfo'>
-  <h2><div><strong>Signal Intensity:</strong> <span id='mag'></span></div></h2>
+  <h2><div><strong>Signal Strength:</strong> <span id='mag'></span></div></h2>
 
   </div>
 </div>
@@ -440,29 +440,29 @@ var showAmount = function(){
           .attr("id","tooltip")
           .text(function(d){
             if(d.index == 0){
-            return "Signals whose intensities in 0.00-0.20 cover 0.39% area of NYC";
+            return "Signals whose strengths in 0.00-0.20 cover 0.39% area of NYC";
           }else if(d.index == 1){
-            return "Signals whose intensities in 0.20-0.27 cover 0.30% area of NYC";
+            return "Signals whose strengths in 0.20-0.27 cover 0.30% area of NYC";
           }else if(d.index == 2){
-            return "Signals whose intensities in 0.27-0.33 cover 0.39% area of NYC";
+            return "Signals whose strengths in 0.27-0.33 cover 0.39% area of NYC";
           }else if(d.index == 3){
-            return "Signals whose intensities in 0.33-0.40 cover 2.47% area of NYC";
+            return "Signals whose strengths in 0.33-0.40 cover 2.47% area of NYC";
           }else if(d.index == 4){
-            return "Signals whose intensities in 0.40-0.47 cover 8.20% area of NYC";
+            return "Signals whose strengths in 0.40-0.47 cover 8.20% area of NYC";
           }else if(d.index == 5){
-            return "Signals whose intensities in 0.47-0.53 cover 1.42% area of NYC";
+            return "Signals whose strengths in 0.47-0.53 cover 1.42% area of NYC";
           }else if(d.index == 6){
-            return "Signals whose intensities in 0.53-0.60 cover 11.65% area of NYC";
+            return "Signals whose strengths in 0.53-0.60 cover 11.65% area of NYC";
           }else if(d.index == 7){
-            return "Signals whose intensities in 0.60-0.67 cover 19.49% area of NYC";
+            return "Signals whose strengths in 0.60-0.67 cover 19.49% area of NYC";
           }else if(d.index == 8){
-            return "Signals whose intensities in 0.67-0.73 cover 4.32% area of NYC";
+            return "Signals whose strengths in 0.67-0.73 cover 4.32% area of NYC";
           }else if(d.index == 9){
-            return "Signals whose intensities in 0.73-0.80 cover 12.10% area of NYC";
+            return "Signals whose strengths in 0.73-0.80 cover 12.10% area of NYC";
           }else if(d.index == 10){
-            return "Signals whose intensities in 0.80-0.87 cover 15.36% area of NYC";
+            return "Signals whose strengths in 0.80-0.87 cover 15.36% area of NYC";
           }else {
-            return "Signals whose intensities in 0.87-1.00 cover 23.92% area of NYC";
+            return "Signals whose strengths in 0.87-1.00 cover 23.92% area of NYC";
           }
           })
         };

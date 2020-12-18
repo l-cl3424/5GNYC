@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8' />
+  <title>Display a map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+  <!-- Import Mapbox GL Draw -->
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.2/mapbox-gl-directions.js'></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.2/mapbox-gl-directions.css' type='text/css' />
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css' type='text/css' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.js'></script>
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.css' type='text/css' />
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+  </style>
+</head>
+<body>
+<style>
+    .map-overlay {
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        background-color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+        position: absolute;
+        width: 25%;
+        top: 10px;
+        left: 10px;
+        padding: 10px;
+        display: none;
+    }
+</style>
+<div id='map'></div>
+<div id="map-overlay" class="map-overlay"></div>
+
+<script>
+//this part of the example can be found at mapbox: https://docs.mapbox.com/mapbox-gl-js/example/simple-map/
+//you will find the accessToken and the style for your map under "Share" in your specific map in mapbox studio
+mapboxgl.accessToken = 'pk.eyJ1IjoiMzMyMzE2MDUxIiwiYSI6ImNraHU1cm93dDExcjQycW14NHg3M2RsMGgifQ.lhxibs4TubP0hO4H9QsOsQ';
+
+var map = new mapboxgl.Map({
+  container: 'map',//thi sis the div that you have mad above in html that you are now placing your map in
+  style: 'mapbox://styles/332316051/ckhu69w1h0gfi19qocj828x65',//you will find the accessToken under "Share" in your specific map in mapbox studio
+  center: [-73.968285, 40.785091],//the center of the map can be set to any initial value of [lng,lat]
+  zoom: 12//note that some layers have zoom limits - for example, streets and building footprints are not visible when zoomed out
+});
+
+map.doubleClickZoom.disable();
+
+var overlay = document.getElementById('map-overlay');
+
+map.on('load', function() {
+
+  map.addSource('Amp', {
+    'type': 'geojson',
+    'data': './NYC_Amp_Final.geojson',
+    'generateId': true // This ensures that all features have unique IDs
+  });
+         map.addLayer({
+           'id': 'hex',
+           'type': 'fill',
+           'source': 'Amp',
+           'paint': {
+             'fill-color': '#888888',
+             'fill-opacity': 0
+           }
+           });
+          map.addLayer({
+           'id': 'hex_highlighted',
+           'type': 'line',
+           'source': 'Amp',
+           'paint': {
+             'line-color': '#ffffff',
+             'line-opacity': 0.5,
+             'line-width': 2
+           },
+           'filter': ['in', 'Amplitude', '']
+       	   });
+
+        map.on('mousemove', 'hex', function (e) {
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+
+            // Single out the first found feature.
+            var feature = e.features[0].properties.Amplitude;
+
+            // Query the counties layer visible in the map. Use the filter
+            // param to only collect results that share the same county name.
+            var relatedFeatures = map.querySourceFeatures('hex', {
+                filter: ['in', 'Amplitude', feature]
+            });
+
+            overlay.innerHTML = '';
+
+            map.setFilter('hex_highlighted', [
+                'in',
+                'Amplitude',
+                feature
+            ]);
+  });
+        map.on('mouseleave', 'hex', function () {
+            map.getCanvas().style.cursor = '';
+            map.setFilter('hex_highlighted', ['in', 'Amplitude', '']);
+            overlay.style.display = 'none';
+        });
+});
+
+//4.search
+//also pay attention to the code we added to the header of this file for the geocoder
+//https://docs.mapbox.com/mapbox-gl-js/example/mapbox-gl-geocoder/
+
+//6.directions
+//also pay attention to the 2 files we added to the header of this file for directions
+//https://docs.mapbox.com/mapbox-gl-js/example/mapbox-gl-directions/
+
+    
+</script>
+
+</body>
+</html>
