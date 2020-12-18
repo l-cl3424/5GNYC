@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: Pie layout pie chart</title>
+		<script type="text/javascript" src="../d3.js"></script>
+		<style type="text/css">
+
+			text {
+				font-family: sans-serif;
+				font-size: 12px;
+				fill: white;
+			}
+
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+
+    /*   var i=0;
+			 var j=0;
+			 var dataset;
+			 dataset = d3.geojson("NYC_Amp_Final.geojson");
+			 var l = dataset.features.length;            */
+
+
+
+			//Width and height
+			var w = 300;
+			var h = 300;
+
+
+			var dataset = [ 29, 22, 29, 183, 608, 105, 864, 1445, 320, 897, 1139, 1774 ];
+
+			d3.csv("data.csv")
+			.then(function(data){
+				var dataset1 = data;
+
+				var outerRadius = w / 2;
+				var innerRadius = 0;
+				var arc = d3.arc()
+							.innerRadius(innerRadius)
+							.outerRadius(outerRadius);
+
+				var pie = d3.pie();
+
+				var svg = d3.select("body")
+							.append("svg")
+							.attr("width", w)
+							.attr("height", h);
+
+				var showAmount = function(){
+					svg.selectAll("g.arc")
+					.append("title")
+					.attr("id","tooltip")
+
+					.text(function(d){
+						if(d.Group == 1){
+							return "Signals of 0-0.2 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 2){
+							return "Signals of 0.2-0.27 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 3){
+							return "Signals of 0.27-0.33 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 4){
+							return "Signals of 0.33-0.40 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 5){
+							return "Signals of 0.40-0.47 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 6){
+							return "Signals of 0.47-0.53 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 7){
+							return "Signals of 0.53-0.60 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 8){
+							return "Signals of 0.60-0.67 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 9){
+							return "Signals of 0.67-0.73 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 10){
+							return "Signals of 0.73-0.80 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else if(d.Group == 11){
+							return "Signals of 0.80-0.87 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}else {
+							return "Signals of 0.87-1.00 intensity cover "d.Num.toFixed(2) + "% area of NYC"
+						}
+					})
+				};
+
+				svg.selectAll("g.arc")
+					 .data(dataset)
+					 .enter()
+					 .attr("fill",function(d){
+						 if(d.Group == 1){
+							 return '#fff2f2';
+						 }else if(d.Group == 2){
+							 return '#ffdcdc';
+						 }else if(d.Group == 3){
+							 return '#FFC6C6';
+						 }else if(d.Group == 4){
+							 return '#FFB0B0';
+						 }else if(d.Group == 5){
+							 return '#FF9A9A';
+						 }else if(d.Group == 6){
+							 return '#FF8484';
+						 }else if(d.Group == 7){
+							 return '#FF6E6E';
+						 }else if(d.Group == 8){
+							 return '#FF5858';
+						 }else if(d.Group == 9){
+							 return '#FF4242';
+						 }else if(d.Group == 10){
+							 return '#FF2C2C';
+						 }else if(d.Group == 11){
+							 return '#FF1616';
+						 }else {
+							 return '#FF0000';
+						 }
+					 })
+					 .on("mouseover", function(d,i){
+						 d3.select(this).attr("fill","white");
+						showAmount();
+					 })
+					 .on("mouseout",function(d,i){
+						 d3.select(this).attr("fill",function(d){
+							 if(d.Group == 1){
+								 return '#fff2f2';
+							 }else if(d.Group == 2){
+								 return '#ffdcdc';
+							 }else if(d.Group == 3){
+								 return '#FFC6C6';
+							 }else if(d.Group == 4){
+								 return '#FFB0B0';
+							 }else if(d.Group == 5){
+								 return '#FF9A9A';
+							 }else if(d.Group == 6){
+								 return '#FF8484';
+							 }else if(d.Group == 7){
+								 return '#FF6E6E';
+							 }else if(d.Group == 8){
+								 return '#FF5858';
+							 }else if(d.Group == 9){
+								 return '#FF4242';
+							 }else if(d.Group == 10){
+								 return '#FF2C2C';
+							 }else if(d.Group == 11){
+								 return '#FF1616';
+							 }else {
+								 return '#FF0000';
+							 }
+						 });
+						 select("#tooltip").remove()
+					 });
+
+				var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+				var arcs = svg.selectAll("g.arc")
+							  .data(pie(dataset))
+							  .enter()
+							  .append("g")
+							  .attr("class", "arc")
+							  .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+			})
+
+			arcs.append("path")
+			    .attr("fill", function(d, i) {
+						if(d.Group == 1){
+							return '#fff2f2';
+						}else if(d.Group == 2){
+							return '#ffdcdc';
+						}else if(d.Group == 3){
+							return '#FFC6C6';
+						}else if(d.Group == 4){
+							return '#FFB0B0';
+						}else if(d.Group == 5){
+							return '#FF9A9A';
+						}else if(d.Group == 6){
+							return '#FF8484';
+						}else if(d.Group == 7){
+							return '#FF6E6E';
+						}else if(d.Group == 8){
+							return '#FF5858';
+						}else if(d.Group == 9){
+							return '#FF4242';
+						}else if(d.Group == 10){
+							return '#FF2C2C';
+						}else if(d.Group == 11){
+							return '#FF1616';
+						}else {
+							return '#FF0000';
+						}
+			    });
+
+		</script>
+	</body>
+</html>
