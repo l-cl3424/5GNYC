@@ -12,7 +12,7 @@
   <style>
   svg {
     position: absolute;
-    bottom: 100px;
+    bottom: 90px;
     left: 185px;
     z-index: 10;
   }
@@ -111,9 +111,11 @@
     based on the base station data and calculation through ArcGIS. Users could hover the
     mouse cursor on each hexagon to see the signal strength in the area and click the legend
      to filter areas in different siganl strength ranges. Also, by hovering the mouse cursor on the pie-chart,
-     the chosen segment will be highlighted and a pop-up label will show the percentage of the signal strength range. </h4>
+     the chosen segment will be highlighted and a pop-up label will show the percentage of the signal strength range.
+     We find in general Manhattan have stronger signals than other boroughs, which might need more base stations in some areas. But Manhattan signals in some areas like Midtown
+     are also weak due to high density of tall buildings. </h4>
 <h4>  <div id="reset">Click the legend to filter the map.<br> Click HERE to reset the map.</div>
-  <br><br>
+  <br>
 	<div id="group12" class="filterButton"><span style="background-color: #FF0000"></span>0.87-1.00</div>
 	<div id="group11" class="filterButton"><span style="background-color: #FF1616"></span>0.80-0.87</div>
 	<div id="group10" class="filterButton"><span style="background-color: #FF2C2C"></span>0.73-0.80</div>
