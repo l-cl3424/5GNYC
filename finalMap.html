@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8' />
+  <title>SIGNAL STRENGTHS NYC</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+<script src="d3.js"></script>
+<script src="pieChart.js"></script>
+
+  <style>
+  svg {
+    position: absolute;
+    bottom: 97.5px;
+    left: 192.5px;
+    z-index: 10;
+  }
+
+	.legend {
+	background-color: rgba(255, 255, 255, 0.75);
+	border-radius: 0px;
+  top: 0px;
+	bottom: 0px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+	padding: 25px;
+  width: 30%;
+	position: absolute;
+	left: 0px;
+	z-index: 1;
+	}
+
+  #title{
+    font-size: 10pt;
+    font-weight: "bold";
+    font: 'Helvetica Neue';
+  }
+
+	.legend h4 {
+	margin: 0 0 30px;
+	}
+
+	.legend div span {
+	border-radius: 50%;
+	display: inline-block;
+	height: 10px;
+	margin-right: 5px;
+	width: 10px;
+	}
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+		.signalInfo {
+		  position: absolute;
+		  font-family: sans-serif;
+		  bottom: 0px;
+		  left: 15px;
+		  padding: 10px;
+		  width: 75%;
+		/*  border: 2px solid black;  */
+		  font-size: 14px;
+		  color: #222;
+		  background-color:rgba(255, 255, 255, 0);
+		  border-radius: 3px;
+		}
+
+    .pie {
+		  position: absolute;
+		  font-family: sans-serif;
+		  bottom: 0px;
+		  left: 10px;
+		  padding: 10px;
+		  width: 75%;
+		/*  border: 2px solid black;  */
+		  font-size: 14px;
+		  color: #222;
+		  background-color:rgba(255, 255, 255, 0);
+		  border-radius: 3px;
+		}
+    .filterButton {
+
+
+      left: 100px;
+
+    }
+
+/*. */
+
+
+  </style>
+</head>
+<body>
+
+  <div id='map'></div>
+
+
+
+<div id="state-legend" class="legend">
+  <div id="title">	<h1>SIGNAL STRENGTHS NYC</h1></div>
+    <h4>by Chengliang Li & Zhaoxiang Yun<br><br>
+      This project is trying to visualize the mobile phone signal strengths in New York City
+    based on the base station data and calculation through ArcGIS. Users could hover the
+    mouse cursor on each hexagon to see the signal strength in the area and click the legend
+     to filter areas in different siganl strength ranges. Also, by hovering the mouse cursor on the pie-chart,
+     the chosen segment will be highlighted and a pop-up label will show the percentage of the signal strength range.
+     We find in general Manhattan have stronger signals than other boroughs, which might need more base stations in some areas. But Manhattan signals in some areas like Midtown
+     are also weak due to high density of tall buildings. </h4>
+<h4>  <div id="reset">Click the legend to filter the map.<br> Click HERE to reset the map.</div>
+  <br>
+	<div id="group12" class="filterButton"><span style="background-color: #FF0000"></span>0.87-1.00</div>
+	<div id="group11" class="filterButton"><span style="background-color: #FF1616"></span>0.80-0.87</div>
+	<div id="group10" class="filterButton"><span style="background-color: #FF2C2C"></span>0.73-0.80</div>
+	<div id="group9" class="filterButton"><span style="background-color: #FF4242"></span>0.67-0.73</div>
+	<div id="group8" class="filterButton"><span style="background-color: #FF5858"></span>0.60-0.67</div>
+	<div id="group7" class="filterButton"><span style="background-color: #FF6E6E"></span>0.53-0.60</div>
+	<div id="group6" class="filterButton"><span style="background-color: #FF8484"></span>0.47-0.53</div>
+  <div id="group5" class="filterButton"><span style="background-color: #FF9A9A"></span>0.40-0.47</div>
+  <div id="group4" class="filterButton"><span style="background-color: #FFB0B0"></span>0.33-0.40</div>
+  <div id="group3" class="filterButton"><span style="background-color: #FFC6C6"></span>0.27-0.33</div>
+  <div id="group2" class="filterButton"><span style="background-color: #ffdcdc"></span>0.20-0.27</div>
+  <div id="group1" class="filterButton"><span style="background-color: #fff2f2"></span>0.00-0.20</div></h4>
+  <br><br>
+  <div class='signalInfo'>
+  <h2><div><strong>Signal Strength:</strong> <span id='mag'></span></div></h2>
+
+  </div>
+</div>
+<div id="map-overlay" class="map-overlay"></div>
+  <script>
+
+
+
+
+
+    Promise.all([d3.json("NYC_Amp_Final.geojson")])
+    .then(function(data){
+        ready(data[0])
+    })
+
+    function ready(data){
+        var map = drawMap(data)
+
+      d3.select("#group1")
+      .on("mouseover",function(){
+        var filter1 = ['<','Avg_grid_code',3]
+        map.setFilter('signals-viz', filter1);
+      })
+
+      d3.select("#group2")
+      .on("click",function(){
+        //THIS IS HOW YOU COMBINE FILTERS
+        var filter2 =["all", ['>=','Avg_grid_code',3],['<','Avg_grid_code',4]]
+        map.setFilter('signals-viz', filter2);
+      })
+
+      d3.select("#group3")
+      .on("click",function(){
+        var filter3 =["all", ['>=','Avg_grid_code',4],['<','Avg_grid_code',5]]
+        map.setFilter('signals-viz', filter3);
+      })
+
+      d3.select("#group4")
+      .on("click",function(){
+        var filter4 =["all", ['>=','Avg_grid_code',5],['<','Avg_grid_code',6]]
+        map.setFilter('signals-viz', filter4);
+      })
+
+      d3.select("#group5")
+      .on("click",function(){
+        var filter5 =["all", ['>=','Avg_grid_code',6],['<','Avg_grid_code',7]]
+        map.setFilter('signals-viz', filter5);
+      })
+
+      d3.select("#group6")
+      .on("click",function(){
+        var filter6 =["all", ['>=','Avg_grid_code',7],['<','Avg_grid_code',8]]
+        map.setFilter('signals-viz', filter6);
+      })
+
+      d3.select("#group7")
+      .on("click",function(){
+        var filter7 =["all", ['>=','Avg_grid_code',8],['<','Avg_grid_code',9]]
+        map.setFilter('signals-viz', filter7);
+      })
+
+      d3.select("#group8")
+      .on("click",function(){
+        var filter8 =["all", ['>=','Avg_grid_code',9],['<','Avg_grid_code',10]]
+        map.setFilter('signals-viz', filter8);
+      })
+
+      d3.select("#group9")
+      .on("click",function(){
+        var filter9 =["all", ['>=','Avg_grid_code',10],['<','Avg_grid_code',11]]
+        map.setFilter('signals-viz', filter9);
+      })
+
+      d3.select("#group10")
+      .on("click",function(){
+        var filter10 =["all", ['>=','Avg_grid_code',11],['<','Avg_grid_code',12]]
+        map.setFilter('signals-viz', filter10);
+      })
+
+      d3.select("#group11")
+      .on("click",function(){
+        var filter11 =["all", ['>=','Avg_grid_code',12],['<','Avg_grid_code',13]]
+        map.setFilter('signals-viz', filter11);
+      })
+
+
+      d3.select("#group12")
+  /*    .on("mouseover",function(){
+        var filter12 = ['>=','Avg_grid_code',13]
+        map.setFilter('signals-viz', filter12);
+      })
+      .on("mouseout",function(){
+        map.setFilter('signals-viz',["all", ['>=','Avg_grid_code',0],['<','Avg_grid_code',20]]);
+      })   */
+      .on("click",function(){
+        var filter12 = ['>=','Avg_grid_code',13]
+        map.setFilter('signals-viz', filter12);
+      })
+
+      d3.select("#reset")
+      .on("click",function(){
+        map.setFilter('signals-viz',["all", ['>=','Avg_grid_code',0],['<','Avg_grid_code',20]]);
+      })
+
+
+    }
+
+      function drawMap(data){
+
+              mapboxgl.accessToken = 'pk.eyJ1IjoiMzMyMzE2MDUxIiwiYSI6ImNraHU1cm93dDExcjQycW14NHg3M2RsMGgifQ.lhxibs4TubP0hO4H9QsOsQ';
+              var map = new mapboxgl.Map({
+                container: 'map', // Specify the container ID
+                style: 'mapbox://styles/332316051/ckit27nn31ib119nny2tt7xxo', // Specify which map style to use
+                center: [-73.98, 40.78], // Specify the starting position [lng, lat]
+                minZoom: 2,
+                zoom: 11 // Specify the starting zoom
+              });
+
+      //     var overlay = document.getElementById('map-overlay');
+
+           var popup = new mapboxgl.Popup({
+                closeButton: false
+            });
+
+
+      		var magDisplay = document.getElementById('mag');
+
+          map.on('load', function() {
+        //    console.log(map.getStyle().layers)
+
+        d3.selectAll(".mapboxgl-ctrl-logo").remove()
+        d3.selectAll(".mapboxgl-ctrl-attrib").remove()
+
+        map.addSource('signals', {
+          'type': 'geojson',
+          'data': './NYC_Amp_Final.geojson',
+  //        'generateId': true // This ensures that all features have unique IDs
+        });
+
+        map.addLayer({
+           'id': 'signals-viz',
+           'type': 'fill',
+           'source': 'signals',
+           'source-id': 'Avg_grid_code',
+           'paint': {
+             'fill-color': [
+               'case',
+               ['boolean',
+                 ['feature-state', 'hover'],
+                 false
+               ],
+
+                 '#fff'
+               ,
+              [ 'interpolate',
+               ['linear'],
+               ['get', 'Avg_grid_code'],
+               2, '#fff2f2',
+               3, '#ffdcdc',
+                       4, '#FFC6C6',
+                       5, '#FFB0B0',
+                       6, '#FF9A9A',
+                       7, '#FF8484',
+                       8, '#FF6E6E',
+                       9, '#FF5858',
+                       10, '#FF4242',
+                       11, '#FF2C2C',
+                       12, '#FF1616',
+                       13, '#FF0000',]
+             ],
+               'fill-opacity': 0.66
+           }
+         });
+
+
+
+  })
+
+      var signalID = null;
+
+      map.on('mousemove', 'signals-viz', (e) => {
+
+        map.getCanvas().style.cursor = 'pointer';
+        // Set variables equal to the current feature's magnitude, location, and time
+      	var signalMagnitude = e.features[0].properties.Avg_grid_code;
+        // Check whether features exist
+
+        if (e.features.length > 0) {
+          // Display the magnitude, location, and time in the sidebar
+          var num = signalMagnitude/15;
+          magDisplay.textContent = num.toFixed(2);
+
+
+
+          if (signalID) {
+            map.removeFeatureState({
+              source: "signals",
+              id: signalID
+            });
+          }
+
+          signalID = e.features[0].id;
+
+          map.setFeatureState({
+            source: 'signals',
+            id: signalID,
+          }, {
+            hover: true
+          });
+        }
+      })
+
+/*
+map.on('load', function () {
+    // Add the source to query. In this example we're using
+    // county polygons uploaded as vector tiles
+    map.addSource('NYC_Amp_Final', {
+        'type': 'geojson',
+        'data': data
+    });
+/*
+    map.addLayer(
+        {
+            'id': 'hex',
+            'type': 'fill',
+            'source': 'NYC_Amp_Final',
+            'paint': {
+          //    'fill-color': '#000',
+          'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'Avg_grid_code'],
+          2, '#fff2f2',
+          3, '#ffdcdc',
+                  4, '#FFC6C6',
+                  5, '#FFB0B0',
+                  6, '#FF9A9A',
+                  7, '#FF8484',
+                  8, '#FF6E6E',
+                  9, '#FF5858',
+                  10, '#FF4242',
+                  11, '#FF2C2C',
+                  12, '#FF1616',
+                  13, '#FF0000',
+
+          ],
+          'fill-opacity': 0.75
+            //  'fill-stroke-width': 1,
+            }
+        }); // Place polygon under these labels.
+  }) */
+return map
+}
+
+var tt=7415
+var w = 220;
+var h = 220;
+var datasets = [ 29, 22, 29, 183, 608, 105, 864, 1445, 320, 897, 1139, 1774 ];
+var dataset = [
+    {label: "0.00-0.20", count: 29, index: 0, Num: 0.39},
+    {label: "0.20-0.27", count: 22, index: 1, Num:0.30},
+    {label: "0.27-0.33", count: 29, index: 2, Num:0.39},
+    {label: "0.33-0.40", count: 183, index: 3, Num:2.47},
+    {label: "0.40-0.47", count: 608, index: 4, Num:8.20},
+    {label: "0.47-0.53", count: 105, index: 5, Num:1.42},
+    {label: "0.53-0.60", count: 864, index: 6, Num:11.65},
+    {label: "0.60-0.67", count: 1445, index: 7, Num:19.49},
+    {label: "0.67-0.73", count: 320, index: 8, Num:4.32},
+    {label: "0.73-0.80", count: 897, index: 9, Num:12.10},
+    {label: "0.80-0.87", count: 1139, index: 10, Num:15.36},
+    {label: "0.87-1.00", count: 1774, index: 11, Num:23.92}
+  ];
+
+var outerRadius = w / 2;
+var innerRadius = 0;
+var arc = d3.arc()
+      .innerRadius(innerRadius)
+      .outerRadius(outerRadius);
+
+var pie = d3.pie()
+.value(function(d){
+  return d.count;
+})
+.sort(null);
+
+//Easy colors accessible via a 10-step ordinal scale
+var color = d3.scaleOrdinal( )
+.domain(dataset)
+.range(["#FF0000", "#fff2f2", "#ffdcdc", "#FFC6C6", "#FFB0B0", "#FF9A9A", "#FF8484", "#FF6E6E",
+"#FF5858", "#FF4242", "#FF2C2C", "#FF1616"]);
+
+//Create SVG element
+var svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h);
+
+//Set up groups
+var arcs = svg.selectAll("g.arc")
+        .data(pie(dataset))
+        .enter()
+        .append("g")
+        .attr("class", "arc")
+        .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+
+var showAmount = function(){
+    svg.selectAll("g.arc")
+          .append("title")
+          .attr("id","tooltip")
+          .text(function(d){
+            if(d.index == 0){
+            return "Signals whose strengths in 0.00-0.20 cover 0.39% area of NYC";
+          }else if(d.index == 1){
+            return "Signals whose strengths in 0.20-0.27 cover 0.30% area of NYC";
+          }else if(d.index == 2){
+            return "Signals whose strengths in 0.27-0.33 cover 0.39% area of NYC";
+          }else if(d.index == 3){
+            return "Signals whose strengths in 0.33-0.40 cover 2.47% area of NYC";
+          }else if(d.index == 4){
+            return "Signals whose strengths in 0.40-0.47 cover 8.20% area of NYC";
+          }else if(d.index == 5){
+            return "Signals whose strengths in 0.47-0.53 cover 1.42% area of NYC";
+          }else if(d.index == 6){
+            return "Signals whose strengths in 0.53-0.60 cover 11.65% area of NYC";
+          }else if(d.index == 7){
+            return "Signals whose strengths in 0.60-0.67 cover 19.49% area of NYC";
+          }else if(d.index == 8){
+            return "Signals whose strengths in 0.67-0.73 cover 4.32% area of NYC";
+          }else if(d.index == 9){
+            return "Signals whose strengths in 0.73-0.80 cover 12.10% area of NYC";
+          }else if(d.index == 10){
+            return "Signals whose strengths in 0.80-0.87 cover 15.36% area of NYC";
+          }else {
+            return "Signals whose strengths in 0.87-1.00 cover 23.92% area of NYC";
+          }
+          })
+        };
+
+arcs.append("path")
+.attr("fill", function(d, i) {
+   return color(i);
+ })
+ .attr("d", arc)
+
+  .on("mouseover",function(d,i){
+        d3.select(this).attr("fill","rgba(255,255,255,0.5)");
+       showAmount();
+})
+.on("mouseout",function(d){
+  d3.select(this)
+  .attr("fill",function(d) {
+    if(d.index == 0){
+      return '#fff2f2';
+    }else if(d.index == 1){
+      return '#ffdcdc';
+    }else if(d.index == 2){
+      return '#FFC6C6';
+    }else if(d.index == 3){
+      return '#FFB0B0';
+    }else if(d.index == 4){
+      return '#FF9A9A';
+    }else if(d.index == 5){
+      return '#FF8484';
+    }else if(d.index == 6){
+      return '#FF6E6E';
+    }else if(d.index == 7){
+      return '#FF5858';
+    }else if(d.index == 8){
+      return '#FF4242';
+    }else if(d.index == 9){
+      return '#FF2C2C';
+    }else if(d.index == 10){
+      return '#FF1616';
+    }else {
+      return '#FF0000';
+    }
+  })
+})
+;
+  </script>
+
+</body>
+</html>
